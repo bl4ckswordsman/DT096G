@@ -1,4 +1,4 @@
-# Theory of Programming Languages - DT096G
+# Theory of Programming Languages course - DT096G
 
 - [Lab 1](/L1_PARSING): Parsing
 - [Lab 2](/L2_JS): Investigation of the Javascript prototype programming paradigm
