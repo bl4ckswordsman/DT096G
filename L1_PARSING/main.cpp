@@ -1,27 +1,20 @@
 #include <iostream>
-#include <string>
+#include <fstream>
 
-bool parseOr(const std::string& input, size_t& pos, const std::string& op1, const std::string& op2) {
-    // Logic for OR operator
-    // Return true if a match is found, otherwise false
-}
+#include "parser.h"
 
-bool parseStar(const std::string& input, size_t& pos, const std::string& operand) {
-    // Logic for * operator
-}
-
-bool parseDot(const std::string& input, size_t& pos) {
-    // Logic for . operator
-}
-
-// Add similar functions for other operators
-
-bool parseExpression(const std::string& input, size_t& pos) {
-    // Logic for parsing the main expression (EXPR)
-
-}
-
-int main() {
-    std::cout << "Hello, World!" << std::endl;
+int main(int argc, char* argv[]) {
+    std::string program = "escape"; // argv[1];
+    std::string input = "Waterloo I was defeated, you won the war Waterloo promise to love you for ever more Waterloo couldn't escape if I wanted to Waterloo knowing my fate is to be with you Waterloo finally facing my Waterloo";
+    auto first = program.begin();
+    auto last = program.end();
+    if (match_op* tree = parse_match(first, last)) {
+        if (tree) {
+            auto match = tree->eval(input.begin(), input.end());
+            std::cout << "Match result: " << (match ? "Yes" : "No") << '\n';
+        } else {
+            std::cout << "Parsing failed.\n";
+        }
+    }
     return 0;
 }
