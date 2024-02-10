@@ -50,9 +50,16 @@ struct group_op : op {
 
 struct or_op : op {
     bool eval(it first, it last) override;
+    int last_evaluated_child = -1; // -1 means neither child has been evaluated yet
+
 };
 
-struct any_op : op {
+struct any_op : char_op {
+    bool eval(it first, it last) override;
+    explicit any_op(const char c = '\0') : char_op(c) {}
+};
+
+struct repeat_op : op {
     bool eval(it first, it last) override;
 };
 

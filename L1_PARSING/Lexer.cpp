@@ -7,61 +7,71 @@
 #include <map>
 #include "Lexer.h"
 
-char Lexer::check(it &first, it last) {
+int Lexer::check(it &first, it last) {
     if (first == last) {
         type = END;
-        return '$';
+        return type;
     }
     switch (*first) {
         case '+':
             type = OR;
-            return '+';
+            break;
         case '*':
             type = REPEAT;
-            return '*';
+            break;
         case '(':
             type = GROUP_START;
-            return '(';
+            break;
         case ')':
             type = GROUP_END;
-            return ')';
+            break;
         case '.':
             type = ANY;
-            return '.';
+            break;
         case '{':
             type = COUNT_START;
-            return '{';
+            break;
         case '}':
             type = COUNT_END;
-            return '}';
+            break;
         case '\\': {
+            auto next = std::next(first, 1);
+            if (next != last && *next == 'I') {
+                type = IGNORE_CASE;
+                ++first; // Move to the next character safely
+            } else if (next != last && *next == 'O') {
+                type = OUTPUT;
+                ++first;
+            }
+            break;
+        }
+        /*case '\\': {
             if (*(first + 1) == 'I') {
                 type = IGNORE_CASE;
-                return 'I';
             }
             if (*(first + 1) == 'O' && *(first + 2) == '{') {
                 type = OUTPUT;
-                return 'O';
             }
-        }
+        }*/
         default:
             if (isdigit(*first)) {
                 type = DIGIT;
-                return *first;
             }
-            if (isalpha(*first)) {
+            if (isalnum(*first) || *first == ' ') {
                 type = CHAR;
-                return *first;
+            } else {
+                type = INVALID;
             }
-            type = INVALID;
-            return *first;
+            break;
     }
+    return type;
 }
 
 int Lexer::get_next_token(it &first, const it &last) {
     Lexer lexer;
     if (first != last) {
-        return lexer.check(first, last);
+        lexer.check(first, last);
+        return lexer.type;
     }
     return END;
 }

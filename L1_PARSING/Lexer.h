@@ -6,23 +6,21 @@
 #define L1_PARSING_LEXER_H
 
 #include <string>
-#include <vector>
 
 #include "ops.h"
 
 //GRAMMAR:
 /**
- *  <MATCH>                ->  <WORD>
- *  <EXPR>                    ->  <OR>  |  <REPEAT>  |  <GROUP>  |  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <WORD>
-     <OR>                       ->  <OPERAND>  +  <OPERAND>
-     <REPEAT>               ->  <OPERAND>  *
-     <GROUP>                ->  (  <EXPR>  )
+ *  <MATCH>                ->  <EXPR>
+ *  <EXPR>                    ->  <OR>  |  <REPEAT>  |  <GROUP>  |  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <TEXT>
+     <OR>                       ->  <TEXT>  +  <TEXT>
+     <REPEAT>               ->  <TEXT>  *
+     <GROUP>                ->  (  <TEXT>  )
      <ANY>                     ->  .
-     <COUNT>               ->  <OPERAND>  {  <NUMBER>  }
+     <COUNT>               ->  <TEXT>  {  <NUMBER>  }
      <IGNORE_CASE>    ->  <EXPR>  \I
      <OUTPUT>             ->  <EXPR>  \O{  <NUMBER>  }
-     <OPERAND>           ->  <CHAR>  |  <WORD>
-     <WORD>                 ->  <CHAR> [<WORD>]
+     <TEXT>                 ->  <CHAR> [<TEXT>]
      <NUMBER>             ->  <DIGIT>  |  <DIGIT>  <NUMBER>
      <CHAR>                  ->  any non-special character */
 
@@ -42,14 +40,14 @@ public:
         OUTPUT, // \O{
         NUMBER, // <DIGIT>  |  <DIGIT>  <NUMBER>
         CHAR, // any non-special character
-        WORD, // <CHAR> [<WORD>]
+        TEXT, // <CHAR> [<TEXT>]
         DIGIT, // 0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9
         INVALID, // invalid input 13
         END
     };
 
-    int type = 13; //invalid input
-    char check(it &first, it last);
+    int type = INVALID; //13; //invalid input, initialization
+    int check(it &first, it last);
 
     static int get_next_token(it &first, const it &last);
 };
