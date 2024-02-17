@@ -7,6 +7,8 @@
 
 <a id="item-one"></a>
 ## [Lab 1](/L1_PARSING): Parsing
+<details>
+  <summary>Class diagram (Click to expand)</summary>
 ```mermaid
 classDiagram
 op --> char_op
@@ -32,6 +34,7 @@ or_op : int last_evaluated_child
 any_op : bool eval(it first, it last) override
 ignore_case_op : bool eval(it first, it last) override
 ```
+</details>
 
 <a id="item-two"></a>
 ## [Lab 2](/L2_JS): Investigation of the Javascript prototype programming paradigm
