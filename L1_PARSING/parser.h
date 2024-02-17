@@ -17,5 +17,6 @@ group_op* parse_group(it& first, it last);
 text_op* parse_text(it &first, it last);
 any_op* parse_any(it& first, it last);
 repeat_op* parse_repeat(it& first, it last);
+ignore_case_op* parse_ignore_case(it& first, it last);
 
 #endif //L1_PARSING_PARSER_H

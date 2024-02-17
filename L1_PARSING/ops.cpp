@@ -20,10 +20,7 @@ void op::set_ignore_case(bool ignore_case) {
 }
 
 bool char_op::eval(it first, it last) {
-    if(first == last) {
-        return false;
-    }
-    if (*first == character) {
+    if(first != last && ((ignore_case && tolower(*first) == tolower(character)) || *first == character)) {
         ++first;
         return true;
     }
@@ -58,21 +55,6 @@ bool match_op::eval(it first, it last){
     return true;
 }
 
-/*bool match_op::eval(it first, it last) {
-    for (auto start = first; start != last; ++start) {
-        auto temp = start; // Temporary iterator to track the current position
-        for (auto op: children) {
-            if (!op->eval(temp, last)) {
-                break; // If not found, check the next character in the text for match
-            }
-            if (op == children.back()) {
-                return true; // If the last character is found, return true
-            }
-        }
-    }
-    return false;
-}*/
-
 bool group_op::eval(it first, it last) {
     for (auto op: children) {
         if (!op->eval(first, last)) {
@@ -81,17 +63,7 @@ bool group_op::eval(it first, it last) {
     }
     return true;
 }
-/*
-bool or_op::eval(it first, it last) {
-    auto first_copy = first;
-    bool lhs = children[0]->eval(first, last);
-    if (lhs) {
-        first = first_copy;
-        return true;
-    }
-    return children[1]->eval(first, last);
-}
- */
+
 bool or_op::eval(it first, const it last) {
     auto first_copy = first;
     bool lhs = children[0]->eval(first, last);
@@ -139,5 +111,19 @@ bool repeat_op::eval(it first, it last) {
 }
 
 bool ignore_case_op::eval(it first, it last) {
-    return op::eval(first, last);
+    for (auto &c: children) {
+        ignore_case_for_all(c);
+    }
+    it temp = first;
+    if (children[0]->eval(first, last)) {
+        return true;
+    }
+    return false;
+}
+
+void ignore_case_op::ignore_case_for_all(op *node) {
+    node->set_ignore_case(true);
+    for (auto &c: node->children) {
+        ignore_case_for_all(c);
+    }
 }

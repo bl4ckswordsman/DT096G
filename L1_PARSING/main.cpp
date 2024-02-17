@@ -9,12 +9,8 @@ std::string GREEN("\033[1;32m");
 std::string RESET("\033[0m");
 
 
-
 std::string build_tree_string(op* node, std::string& input) {
     std::string result;
-    if (auto* ignore_case_node = dynamic_cast<ignore_case_op*>(node)) {
-        return result; // Skip the printing of 'I'
-    }
     if (auto* any_node = dynamic_cast<any_op*>(node)) {
         result += any_node->character;         // Append the character for the any_op node
         for (auto* child : node->children) {
@@ -32,7 +28,12 @@ std::string build_tree_string(op* node, std::string& input) {
         } else {
             result += build_tree_string(orNode->children[0], input) + " + " + build_tree_string(orNode->children[1], input);
         }
-    } else {
+    } else if (auto* ignore_case_node = dynamic_cast<ignore_case_op*>(node)){
+        for (auto* child : node->children) {
+            result += build_tree_string(child, input);
+        }
+    }
+    else {
         // Recursively process children for all other node types, ensuring comprehensive coverage of the parse tree.
         for (auto* child : node->children) {
             result += build_tree_string(child, input);
@@ -40,10 +41,6 @@ std::string build_tree_string(op* node, std::string& input) {
     }
     return result;
 }
-
-
-
-
 
 
 void print_tree_types(op* node, int depth = 0) {
@@ -109,7 +106,7 @@ void print_colored(const std::string& input, const std::string& pattern) {
 
 
 int main(int argc, char* argv[]) {
-    std::string program = "hate+love"; // argv[1];
+    std::string program = "loveI"; // argv[1];
     std::string input = "Waterloo I was defeated, you won the war Waterloo promise to love you for ever more Waterloo couldn't escape if I wanted to Waterloo knowing my fate is to be with you Waterloo finally facing my Waterloo";
     auto first = program.begin();
     auto last = program.end();

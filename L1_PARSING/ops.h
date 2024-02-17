@@ -25,8 +25,7 @@ struct op {
 };
 
 struct char_op : op {
-    explicit char_op(char c) : character(c) {
-    }
+    explicit char_op(char c) : character(c) {}
 
     bool eval(it first, it last) override;
 
@@ -68,6 +67,7 @@ struct repeat_op : op {
 struct ignore_case_op : op {
 
     bool eval(it first, it last) override;
+    void ignore_case_for_all(op *node);
 
 };
 

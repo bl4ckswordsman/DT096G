@@ -35,23 +35,34 @@ text_op *parse_text(it &first, it last) {
 expr_op *parse_expr(it &first, it last) {
     auto restore = first;
 
-    auto group_op = parse_group(first, last);
-    if (group_op) {
+    ignore_case_op *ignore_caseNode = parse_ignore_case(first, last);
+    if (ignore_caseNode) {
         auto expr_node = new expr_op;
-        expr_node->add(group_op);
+        expr_node->add(ignore_caseNode);
         if (first != last) ++first; // Move the iterator forward
-        if (group_op->eval(first, last)) {
+        if (ignore_caseNode->eval(first, last)) {
             expr_node->add(parse_expr(first, last));
         }
         return expr_node;
     }
-    first = restore;
+
+
     any_op *anyNode = parse_any(first, last);
     if (anyNode) {
         auto expr_node = new expr_op;
         expr_node->add(anyNode);
         if (first != last) ++first; // Move the iterator forward
         if (anyNode->eval(first, last)) {
+            expr_node->add(parse_expr(first, last));
+        }
+        return expr_node;
+    }
+    auto group_op = parse_group(first, last);
+    if (group_op) {
+        auto expr_node = new expr_op;
+        expr_node->add(group_op);
+        if (first != last) ++first; // Move the iterator forward
+        if (group_op->eval(first, last)) {
             expr_node->add(parse_expr(first, last));
         }
         return expr_node;
@@ -176,5 +187,29 @@ repeat_op *parse_repeat(it &first, it last) {
     return nullptr;
 }
 
+ignore_case_op *parse_ignore_case(it &first, it last) {
+    auto first_check = first;
+    text_op *lhs = parse_text(first_check, last);
+    if (!lhs) {
+        std::cout << "lhs is nullptr\n";
+        return nullptr;
+    }
+    auto token = Lexer::get_next_token(first_check, last);
+    if (token != Lexer::IGNORE_CASE) {
+        std::cout << "Next token is not IGNORE_CASE\n";
+        return nullptr;
+    }
+
+    first_check++; // Skip the 'I' operator
+    first_check++;
+
+    first = first_check;
+    auto *result = new ignore_case_op;
+    result->add(lhs);
+
+    std::cout << "Parsed ignore_case operation: " << '\n'; // TODO: Remove debug print
+    std::cout << "lhs: " << lhs << '\n';
+    return result;
+}
 
 
