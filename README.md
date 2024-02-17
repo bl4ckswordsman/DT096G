@@ -9,6 +9,7 @@
 ## [Lab 1](/L1_PARSING): Parsing
 <details>
   <summary>Class diagram (Click to expand)</summary>
+ 
 ```mermaid
 classDiagram
 op --> char_op
