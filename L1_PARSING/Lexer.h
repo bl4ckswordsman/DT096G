@@ -15,10 +15,10 @@
  *  <EXPR>                    ->  <OR>  |  <REPEAT>  |  <GROUP>  |  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <TEXT>
      <OR>                       ->  <TEXT>  +  <TEXT>
      <REPEAT>               ->  <TEXT>  *
-     <GROUP>                ->  (  <TEXT>  )
+     <GROUP>                ->  (  <EXPR>  )
      <ANY>                     ->  .
      <COUNT>               ->  <TEXT>  {  <NUMBER>  }
-     <IGNORE_CASE>    ->  <EXPR>  \I
+     <IGNORE_CASE>    ->  <TEXT>  \I
      <OUTPUT>             ->  <EXPR>  \O{  <NUMBER>  }
      <TEXT>                 ->  <CHAR> [<TEXT>]
      <NUMBER>             ->  <DIGIT>  |  <DIGIT>  <NUMBER>

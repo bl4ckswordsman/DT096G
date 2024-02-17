@@ -15,6 +15,10 @@ bool op::eval(it first, it last) {
     return false;
 }
 
+void op::set_ignore_case(bool ignore_case) {
+    this->ignore_case = ignore_case;
+}
+
 bool char_op::eval(it first, it last) {
     if(first == last) {
         return false;
@@ -132,4 +136,8 @@ bool repeat_op::eval(it first, it last) {
         ++first;
     }
     return true;
+}
+
+bool ignore_case_op::eval(it first, it last) {
+    return op::eval(first, last);
 }

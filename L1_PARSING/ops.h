@@ -18,6 +18,8 @@ struct op {
             children.push_back(child);
         }
     }
+    bool ignore_case = false;
+    void set_ignore_case(bool ignore_case);
 
     std::vector<op *> children;
 };
@@ -61,6 +63,12 @@ struct any_op : char_op {
 
 struct repeat_op : op {
     bool eval(it first, it last) override;
+};
+
+struct ignore_case_op : op {
+
+    bool eval(it first, it last) override;
+
 };
 
 #endif //L1_PARSING_OPS_H

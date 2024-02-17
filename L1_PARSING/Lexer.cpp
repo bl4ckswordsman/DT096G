@@ -36,28 +36,24 @@ int Lexer::check(it &first, it last) {
             break;
         case '\\': {
             auto next = std::next(first, 1);
-            if (next != last && *next == 'I') {
-                type = IGNORE_CASE;
-                ++first; // Move to the next character safely
-            } else if (next != last && *next == 'O') {
-                type = OUTPUT;
-                ++first;
+            if (next != last) {
+                if (*next == 'I') {
+                    type = IGNORE_CASE;
+                    //first = std::next(first, 2); // Skip the 'I' character and the character after it
+                } else if (*next == 'O') {
+                    type = OUTPUT;
+                    ++first;
+                }
+            } else {
+                std::cerr << "Invalid input: " << *first << std::endl;
             }
             break;
         }
-        /*case '\\': {
-            if (*(first + 1) == 'I') {
-                type = IGNORE_CASE;
-            }
-            if (*(first + 1) == 'O' && *(first + 2) == '{') {
-                type = OUTPUT;
-            }
-        }*/
         default:
             if (isdigit(*first)) {
                 type = DIGIT;
             }
-            if (isalnum(*first) || *first == ' ') {
+            if (isalnum(*first) || isspace(*first)) {
                 type = CHAR;
             } else {
                 type = INVALID;
