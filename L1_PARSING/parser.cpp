@@ -10,8 +10,9 @@
 char_op *parse_char(it &first, it last) {
     Lexer lexer;
     lexer.check(first, last);
-    if (lexer.type == Lexer::END || lexer.type != Lexer::CHAR)
+    if (lexer.type == Lexer::END || lexer.type != Lexer::CHAR) {
         return nullptr;
+    }
     return new char_op(*first);
 }
 
@@ -25,9 +26,18 @@ text_op *parse_text(it &first, it last) {
     if (!char_node)
         return nullptr;
     auto *result = new text_op;
-    ++first;
     result->add(char_node);
-    result->add(parse_text(first, last));
+    ++first;
+    Lexer lexer;
+    lexer.check(first, last);
+    if (first != last && lexer.type == Lexer::ANY) {
+        auto any_node = parse_any(first, last);
+        if (any_node) {
+            result->add(any_node);
+        }
+    } else {
+        result->add(parse_text(first, last));
+    }
     return result;
 }
 
@@ -76,7 +86,8 @@ expr_op *parse_expr(it &first, it last) {
         return expr_node;
     }
 
-    any_op *anyNode = parse_any(first, last);
+    first = restore;
+    text_op *anyNode = parse_any(first, last);
     if (anyNode) {
         auto expr_node = new expr_op;
         expr_node->add(anyNode);
@@ -87,6 +98,7 @@ expr_op *parse_expr(it &first, it last) {
     if (text_node) {
         auto expr_node = new expr_op;
         expr_node->add(text_node);
+        expr_node->add(parse_expr(first, last));
         return expr_node;
     }
 
@@ -109,7 +121,7 @@ op* parse_operand(it &first, it last) {
     if (group_op) {
         return group_op;
     }
-    any_op *anyNode = parse_any(first, last);
+    text_op *anyNode = parse_any(first, last);
     if (anyNode) {
         return anyNode;
     }
@@ -163,16 +175,26 @@ op* parse_group(it &first, it last) {
         auto group_node = new group_op;
         group_node->add(expr_node);
 
-        // Check for ignore case operation after the group operation
-        ignore_case_op *ignore_caseNode = parse_ignore_case(first, last);
-        if (ignore_caseNode) {
-            ignore_caseNode->add(group_node);
-            return ignore_caseNode;
-        }
+        // Parse post group operations
+        parse_post_group_operations(group_node, first, last);
 
         return group_node;
     }
     return nullptr;
+}
+
+void parse_post_group_operations(op* group_node, it &first, it last) {
+    // Check for ignore case operation after the group operation
+    ignore_case_op *ignore_caseNode = parse_ignore_case(first, last);
+    if (ignore_caseNode) {
+        group_node->add(ignore_caseNode);
+    }
+
+    // Check for any operation after the group operation
+    text_op *anyNode = parse_any(first, last);
+    if (anyNode) {
+        group_node->add(anyNode);
+    }
 }
 
 
@@ -208,16 +230,23 @@ or_op *parse_or(it first, it last) {
     return result;
 }
 
-any_op *parse_any(it &first, it last) {
+text_op *parse_any(it &first, it last) {
     Lexer lexer;
     lexer.check(first, last);
     if (lexer.type == Lexer::ANY) {
-        auto *result = new any_op(*first); // Pass the current character to the any_op constructor
+        auto *any_node = new any_op(*first); // Pass the current character to the any_op constructor
         ++first; // Move the iterator forward
+        lexer.check(first, last);
         if (first != last && lexer.type == Lexer::ANY) {
-            result->add(parse_any(first, last)); // Recursively call parse_any
+            auto *text_node = new text_op;
+            text_node->add(any_node);
+            text_node->add(parse_any(first, last)); // Recursively call parse_any
+            return text_node;
         }
-        return result;
+        // Wrap the any_op inside a text_op before returning
+        auto *text_node = new text_op;
+        text_node->add(any_node);
+        return text_node;
     }
     return nullptr;
 }

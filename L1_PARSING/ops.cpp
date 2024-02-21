@@ -52,8 +52,9 @@ bool expr_op::eval(it first, it last) {
 }
 
 bool match_op::eval(it first, it last){
-    if(first == last)
+    if(first == last) {
         return false;
+    }
     auto result = children[0]->eval(first, last);
     if(!result){
         return eval(first + 1, last);
@@ -94,12 +95,23 @@ bool or_op::eval(it first, const it last) {
 }*/
 
 
-bool any_op::eval(it first, it last) { // TODO: No need to override the eval method
+/*bool any_op::eval(it first, it last) { // TODO: No need to override the eval method
     if (first == last) {
         return false;
     }
     if (*first == character) {
         ++first;
+        return true;
+    }
+    return false;
+}*/
+
+bool any_op::eval(it first, it last) {
+    if (first == last) {
+        return false;
+    }
+    //++first;
+    if (first != last) {
         return true;
     }
     return false;
@@ -120,7 +132,7 @@ bool ignore_case_op::eval(it first, it last) {
     for (auto &c: children) {
         ignore_case_for_all(c);
     }
-    it temp = first;
+    /*it temp = first;*/ //TODO: Remove this line
     if (children[0]->eval(first, last)) {
         return true;
     }
