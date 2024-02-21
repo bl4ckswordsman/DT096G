@@ -18,8 +18,10 @@ struct op {
 
     bool ignore_case = false;
     void set_ignore_case(bool ignore_case);
+    explicit op (int count = 1) : count(count) {}
 
     std::vector<op *> children;
+    int count = 1;
 };
 
 struct char_op : op {
@@ -84,6 +86,16 @@ struct subexpr_op : expr_op {
     explicit subexpr_op(op* child) {
         add(child);
     }
+};
+
+struct count_op : op {
+    bool eval(it first, it last) override;
+    std::string get_type() const override { return "count_op"; }
+
+
+    count_op() = default;
+
+    explicit count_op(int count = 1) : op(count) {}
 };
 
 #endif //L1_PARSING_OPS_H

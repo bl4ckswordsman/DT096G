@@ -21,5 +21,7 @@ ignore_case_op* parse_ignore_case(it& first, it last);
 subexpr_op* parse_subexpr(it& first, it last);
 op* parse_operand(it& first, it last);
 void parse_post_group_operations(op *group, it& first, it last);
+count_op* parse_count(it& first, it last);
+int parse_number(it& first, it last);
 
 #endif //L1_PARSING_PARSER_H

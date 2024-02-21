@@ -6,13 +6,29 @@
 #include <iostream>
 #include "Lexer.h"
 
+// Static variable to keep track of the output group number
+int output_group = 0;
+
 /*<CHAR>                  ->  any non-special character */
 char_op *parse_char(it &first, it last) {
+    auto restore = first;
     Lexer lexer;
     lexer.check(first, last);
     if (lexer.type == Lexer::END || lexer.type != Lexer::CHAR) {
         return nullptr;
     }
+    ++first;
+    lexer.check(first, last);
+    if (lexer.type == Lexer::COUNT_START) {
+        auto count_node = parse_count(first, last);
+        if (count_node) {
+            auto *result = new char_op(*restore);
+            result->count = count_node->count;
+            return result;
+        }
+    }
+    first = restore;
+
     return new char_op(*first);
 }
 
@@ -38,6 +54,7 @@ text_op *parse_text(it &first, it last) {
     } else {
         result->add(parse_text(first, last));
     }
+    result->count = char_node->count;
     return result;
 }
 
@@ -55,7 +72,12 @@ expr_op *parse_expr(it &first, it last) {
         return expr_node;
     }
 
-
+    count_op *countNode = parse_count(first, last);
+    if (countNode) {
+        auto expr_node = new expr_op;
+        expr_node->add(countNode);
+        return expr_node;
+    }
 
     auto group_op = parse_group(first, last);
     if (group_op) {
@@ -69,16 +91,7 @@ expr_op *parse_expr(it &first, it last) {
         return expr_node;
     }
 
-    /*or_op *orNode = parse_or(first, last);
-    if (orNode) {
-        auto expr_node = new expr_op;
-        expr_node->add(orNode);
-        if (first != last) ++first; // Move the iterator forward
-        if (orNode->eval(first, last)) {
-            expr_node->add(parse_expr(first, last));
-        }
-        return expr_node;
-    }*/
+
     or_op *orNode = parse_or(first, last);
     if (orNode) {
         auto expr_node = new expr_op;
@@ -237,15 +250,19 @@ text_op *parse_any(it &first, it last) {
         auto *any_node = new any_op(*first); // Pass the current character to the any_op constructor
         ++first; // Move the iterator forward
         lexer.check(first, last);
-        if (first != last && lexer.type == Lexer::ANY) {
-            auto *text_node = new text_op;
-            text_node->add(any_node);
-            text_node->add(parse_any(first, last)); // Recursively call parse_any
-            return text_node;
+        if (first != last && lexer.type == Lexer::COUNT_START) {
+            auto *count_node = parse_count(first, last);
+            if (count_node) {
+                any_node->count = count_node->count;
+            }
         }
         // Wrap the any_op inside a text_op before returning
         auto *text_node = new text_op;
         text_node->add(any_node);
+        lexer.check(first, last);
+        if (first != last && lexer.type == Lexer::ANY) {
+            text_node->add(parse_any(first, last)); // Recursively call parse_any
+        }
         return text_node;
     }
     return nullptr;
@@ -260,31 +277,6 @@ repeat_op *parse_repeat(it &first, it last) {
     }
     return nullptr;
 }
-
-/*ignore_case_op *parse_ignore_case(it &first, it last) {
-    auto first_check = first;
-    op *lhs = parse_text(first_check, last);
-    if (!lhs) {
-        std::cout << "lhs is nullptr\n";
-        return nullptr;
-    }
-    auto token = Lexer::get_next_token(first_check, last);
-    if (token != Lexer::IGNORE_CASE) {
-        std::cout << "Next token is not IGNORE_CASE\n";
-        return nullptr;
-    }
-
-    first_check++; // Skip the 'I' operator
-    first_check++;
-
-    first = first_check;
-    auto *result = new ignore_case_op;
-    result->add(lhs);
-
-    std::cout << "Parsed ignore_case operation: " << '\n'; // TODO: Remove debug print
-    std::cout << "lhs: " << lhs << '\n';
-    return result;
-}*/
 
 ignore_case_op *parse_ignore_case(it &first, it last) {
     auto first_check = first;
@@ -309,6 +301,31 @@ ignore_case_op *parse_ignore_case(it &first, it last) {
     std::cout << "Parsed ignore_case operation: " << '\n'; // TODO: Remove debug print
     std::cout << "lhs: " << lhs << '\n';
     return result;
+}
+
+int parse_number(it &first, it last) {
+    int number = 0;
+    while (first != last && isdigit(*first)) {
+        number = number * 10 + (*first - '0');
+        ++first;
+    }
+    return number;
+}
+
+count_op *parse_count(it &first, it last) {
+    Lexer lexer;
+    if (lexer.check(first, last) == Lexer::COUNT_START) {
+        ++first; // Move the iterator forward
+        int count = parse_number(first, last);        // Parse the number enclosed in '{}'
+        std::cout << "Parsed count: " << count << '\n'; //TODO: Remove debug print
+        if (lexer.check(first, last) != Lexer::COUNT_END) {
+            std::cerr << "Expected '}' not found " << std::endl;
+            return nullptr;
+        }
+        ++first; // Move the iterator forward
+        return new count_op(count);
+    }
+    return nullptr;
 }
 
 

@@ -17,7 +17,7 @@
      <REPEAT>               ->  <TEXT>  *
      <GROUP>                ->  (  <EXPR>  )
      <ANY>                     ->  .
-     <COUNT>               ->  <TEXT>  {  <NUMBER>  }
+     <COUNT>               ->  <CHAR>  {  <NUMBER>  } |  <ANY>  {  <NUMBER>  }
      <IGNORE_CASE>    ->  <TEXT>  \I
      <OUTPUT>             ->  <EXPR>  \O{  <NUMBER>  }
      <TEXT>                 ->  <CHAR> [<TEXT>]

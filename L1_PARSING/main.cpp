@@ -50,8 +50,12 @@ void print_tree_types(op *node, int depth = 0, const std::string &prefix = "") {
     std::cout << prefix << "+--" << type;
     if (type == "char_op") {
         char_op *charNode = static_cast<char_op *>(node);
-        std::cout << ": " << charNode->character << BLUE << " ignore_case=" << std::boolalpha << charNode->ignore_case
+        std::cout << ": " << charNode->character << charNode->count << " " << BLUE << " ignore_case=" << std::boolalpha << charNode->ignore_case
                 << RESET;
+    }
+    if (type == "any_op") {
+        any_op *countNode = static_cast<any_op *>(node);
+        std::cout << ": " << countNode->count;
     }
     std::cout << std::endl;
 
@@ -88,7 +92,7 @@ void print_colored(const std::string &input, const std::string &pattern) {
 
 
 int main(int argc, char *argv[]) {
-    std::string program = "facing my Waterlo.."; // argv[1];
+    std::string program = "(hate+Love)\\I"; // argv[1];
     std::string input =
             "Waterloo I was defeated, you won the war Waterloo promise to love you for ever more Waterloo couldn't escape if I wanted to Waterloo knowing my fate is to be with you Waterloo finally facing my Waterloo";
     auto first = program.begin();

@@ -3,6 +3,8 @@
 //
 #include "ops.h"
 
+#include <iostream>
+
 #include "Lexer.h"
 
 
@@ -25,12 +27,22 @@ void op::set_ignore_case(bool ignore_case) {
     this->ignore_case = ignore_case;
 }
 
-bool char_op::eval(it first, it last) {
+/*bool char_op::eval(it first, it last) {
     if(first != last && ((ignore_case && tolower(*first) == tolower(character)) || *first == character)) {
         ++first;
         return true;
     }
     return false;
+}*/
+
+bool char_op::eval(it first, it last) {
+    for (int i = 0; i < count; ++i) {
+        if (first == last || (!ignore_case && *first != character) || (ignore_case && tolower(*first) != tolower(character))) {
+            return false;
+        }
+        ++first;
+    }
+    return true;
 }
 
 bool text_op::eval(it first, it last) {
@@ -40,6 +52,15 @@ bool text_op::eval(it first, it last) {
     }
     return result;
 }
+
+/*bool text_op::eval(it first, it last) {
+    for (int i = 0; i < count; ++i) {
+        if (!children[0]->eval(first, last)) {
+            return false;
+        }
+    }
+    return true;
+}*/
 
 
 bool expr_op::eval(it first, it last) {
@@ -86,27 +107,8 @@ bool or_op::eval(it first, const it last) {
     return rhs;
 }
 
+
 /*bool any_op::eval(it first, it last) {
-    if (first == last) {
-        return false;
-    }
-    ++first;
-    return true;
-}*/
-
-
-/*bool any_op::eval(it first, it last) { // TODO: No need to override the eval method
-    if (first == last) {
-        return false;
-    }
-    if (*first == character) {
-        ++first;
-        return true;
-    }
-    return false;
-}*/
-
-bool any_op::eval(it first, it last) {
     if (first == last) {
         return false;
     }
@@ -115,6 +117,28 @@ bool any_op::eval(it first, it last) {
         return true;
     }
     return false;
+}*/
+
+/*bool any_op::eval(it first, it last) {
+    if (std::distance(first, last) < count) {
+        return false; // Not enough characters left in the input string
+    }
+    char expected_char = *first;
+    for (int i = 0; i < count; ++i) {
+        if (*first != expected_char) {
+            return false; // Found a character that doesn't match the expected character
+        }
+        ++first;
+    }
+    return true; // All characters matched the expected character
+}*/
+
+bool any_op::eval(it first, it last) {
+    if (std::distance(first, last) < count) {
+        return false; // Not enough characters left in the input string
+    }
+    std::advance(first, count); // Move the iterator forward by 'count' positions
+    return true; // If we have 'count' characters, we consider it a match
 }
 
 bool repeat_op::eval(it first, it last) {
@@ -149,4 +173,16 @@ void ignore_case_op::ignore_case_for_all(op *node) {
 bool subexpr_op::eval(it first, it last) {
     if (children.empty()) return false;
     return children[0]->eval(first, last);
+}
+
+bool count_op::eval(it first, it last) {
+    if (children.empty()) {
+        return false; // or handle the error in some other way
+    }
+    for (int i = 0; i < count; ++i) {
+        if (!children[0]->eval(first, last)) {
+            return false;
+        }
+    }
+    return true;
 }
