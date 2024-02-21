@@ -15,6 +15,12 @@ bool op::eval(it first, it last) {
     return false;
 }
 
+void op::add(op *child) {
+    if (child) {
+        children.push_back(child);
+    }
+}
+
 void op::set_ignore_case(bool ignore_case) {
     this->ignore_case = ignore_case;
 }
@@ -126,4 +132,9 @@ void ignore_case_op::ignore_case_for_all(op *node) {
     for (auto &c: node->children) {
         ignore_case_for_all(c);
     }
+}
+
+bool subexpr_op::eval(it first, it last) {
+    if (children.empty()) return false;
+    return children[0]->eval(first, last);
 }

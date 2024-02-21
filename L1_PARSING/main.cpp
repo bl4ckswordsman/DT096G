@@ -11,16 +11,16 @@ std::string RESET("\033[0m");
 
 std::string build_tree_string(op* node, std::string& input) {
     std::string result;
-    if (auto* any_node = dynamic_cast<any_op*>(node)) {
-        result += any_node->character;         // Append the character for the any_op node
-        for (auto* child : node->children) {
-            result += build_tree_string(child, input);
-        }
-    } else if (auto* charNode = dynamic_cast<char_op*>(node)) {
-        // Handle char_op instances, appending their character to the result string.
+    std::string type = node->get_type();
+
+    if (type == "any_op") {
+        auto* any_node = static_cast<any_op*>(node);
+        result += any_node->character;
+    } else if (type == "char_op") {
+        auto* charNode = static_cast<char_op*>(node);
         result += charNode->character;
-    } else if (auto* orNode = dynamic_cast<or_op*>(node)) {
-        // Handle or_op cases by choosing the appropriate child based on last_evaluated_child.
+    } else if (type == "or_op") {
+        auto* orNode = static_cast<or_op*>(node);
         if (orNode->last_evaluated_child == 0) {
             result += build_tree_string(orNode->children[0], input);
         } else if (orNode->last_evaluated_child == 1) {
@@ -28,13 +28,11 @@ std::string build_tree_string(op* node, std::string& input) {
         } else {
             result += build_tree_string(orNode->children[0], input) + " + " + build_tree_string(orNode->children[1], input);
         }
-    } else if (auto* ignore_case_node = dynamic_cast<ignore_case_op*>(node)){
+    } else if (type == "ignore_case_op") {
         for (auto* child : node->children) {
             result += build_tree_string(child, input);
         }
-    }
-    else {
-        // Recursively process children for all other node types, ensuring comprehensive coverage of the parse tree.
+    } else {
         for (auto* child : node->children) {
             result += build_tree_string(child, input);
         }
@@ -43,38 +41,19 @@ std::string build_tree_string(op* node, std::string& input) {
 }
 
 
-void print_tree_types(op* node, int depth = 0) {
-    if (node == nullptr) {
-        return;
-    }
+void print_tree_types(op* node, int depth = 0, const std::string& prefix = "") {
+    if (!node) return;
 
-    // Print the depth
-    for (int i = 0; i < depth; ++i) {
-        std::cout << " | ";
+    std::string type = node->get_type();
+    std::cout << prefix << "+--" << type;
+    if (type == "char_op") {
+        char_op* charNode = static_cast<char_op*>(node);
+        std::cout << ": " << charNode->character << " ignore_case=" << std::boolalpha << charNode->ignore_case;
     }
+    std::cout << std::endl;
 
-    if (auto* any_node = dynamic_cast<any_op*>(node)) {
-        std::cout << "any_op" << std::endl;
-    } else if (auto* ignore_case_node = dynamic_cast<ignore_case_op*>(node)) {
-        std::cout << "ignore_case_char_op" << std::endl;
-    } else if (auto* char_node = dynamic_cast<char_op*>(node)) {
-        std::cout << "char_op: " << char_node->character << " " << (!char_node->ignore_case ? "ignore_case=false" : "ignore case") << (char_node->ignore_case ? "ignore_case=true" : "") << std::endl;
-    } else if (auto* or_node = dynamic_cast<or_op*>(node)) {
-        std::cout << "or_op" << std::endl;
-    } else if (auto* text_node = dynamic_cast<text_op*>(node)) {
-        std::cout << "text_op" << std::endl;
-    } else if (auto* expr_node = dynamic_cast<expr_op*>(node)) {
-        std::cout << "expr_op" << std::endl;
-    } else if (auto* match_node = dynamic_cast<match_op*>(node)) {
-        std::cout << "match_op" << std::endl;
-    } else if (auto* group_node = dynamic_cast<group_op*>(node)) {
-        std::cout << "group_op" << std::endl;
-    } else if (auto* repeat_node = dynamic_cast<repeat_op*>(node)) {
-        std::cout << "repeat_op" << std::endl;
-    }
-
-    for (auto child : node->children) {
-        print_tree_types(child, depth + 1);
+    for (size_t i = 0; i < node->children.size(); ++i) {
+        print_tree_types(node->children[i], depth + 1, prefix + (i < node->children.size() - 1 ? "|   " : "    "));
     }
 }
 
@@ -106,7 +85,7 @@ void print_colored(const std::string& input, const std::string& pattern) {
 
 
 int main(int argc, char* argv[]) {
-    std::string program = "loveI"; // argv[1];
+    std::string program = "(love+hate)\\I"; // argv[1];
     std::string input = "Waterloo I was defeated, you won the war Waterloo promise to love you for ever more Waterloo couldn't escape if I wanted to Waterloo knowing my fate is to be with you Waterloo finally facing my Waterloo";
     auto first = program.begin();
     auto last = program.end();
