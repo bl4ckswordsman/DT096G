@@ -1,25 +1,24 @@
+Array.prototype.iterator = function() {
+    let index = 0; // Initialize index
+    const array = this; // Initialize array
 
-Array.prototype.iter = function() {
-    let index = 0;
-    let array = this;
     return {
         hasNext: function () {
-            return index < array.length;
+            return index < array.length; // Check if more elements exist
         },
         next: function () {
             if (this.hasNext()) {
-                return array[index++];
+                return array[index++]; // Return next element if exists
             }
-            console.log("No more elements");
+            console.log("No more elements"); // Log message if no more elements
             return null;
         },
     }
 }
 
-array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // Define array
+const iterator = array.iterator(); // Create iterator
 
-it = array.iter();
-
-while (it.hasNext()) {
-    console.log(it.next());
+while (iterator.hasNext()) { // Iterate over array
+    console.log(iterator.next());
 }
