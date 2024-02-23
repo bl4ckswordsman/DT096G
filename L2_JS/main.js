@@ -6,10 +6,10 @@ class ArrayIterator {
 
     hasNext() {
         return this.index < this.array.length; // Check if more elements exist
-    }
+    }// "this" refers to the context of func call. determined by where func is invoked, not where it's defined
 
     next() {
-        if (this.hasNext()) {
+        if (this.hasNext()) { // dot is used for properties
             return this.array[this.index++]; // Return next element if exists
         }
         console.log("No more elements"); // Log message if no more elements
