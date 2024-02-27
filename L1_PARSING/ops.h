@@ -18,6 +18,7 @@ struct op {
 
     bool ignore_case = false;
     void set_ignore_case(bool ignore_case);
+    virtual void capture(it &first, it &last) {}
     explicit op (int count = 1) : count(count) {}
 
     std::vector<op *> children;
@@ -52,6 +53,7 @@ struct match_op : op {
 struct group_op : op {
     bool eval(it first, it last) override;
     std::string get_type() const override { return "group_op"; }
+    void capture(it &first, it &last) override;
 };
 
 struct or_op : op {
@@ -67,9 +69,9 @@ struct any_op : char_op {
     explicit any_op(const char c = '\0') : char_op(c) {}
 };
 
-struct repeat_op : op {
+struct star_op : op {
     bool eval(it first, it last) override;
-    std::string get_type() const override { return "repeat_op"; }
+    std::string get_type() const override { return "star_op"; }
 };
 
 struct ignore_case_op : op {
@@ -80,14 +82,6 @@ struct ignore_case_op : op {
 
 };
 
-struct subexpr_op : expr_op {
-    bool eval(it first, it last) override;
-    std::string get_type() const override { return "subexpr_op"; }
-    explicit subexpr_op(op* child) {
-        add(child);
-    }
-};
-
 struct count_op : op {
     bool eval(it first, it last) override;
     std::string get_type() const override { return "count_op"; }
@@ -96,6 +90,13 @@ struct count_op : op {
     count_op() = default;
 
     explicit count_op(int count = 1) : op(count) {}
+};
+
+struct output_op : op {
+    bool eval(it first, it last) override;
+    std::string get_type() const override { return "output_op"; }
+    explicit output_op(int index) : group_index(index) {}
+    int group_index;
 };
 
 #endif //L1_PARSING_OPS_H

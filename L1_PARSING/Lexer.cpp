@@ -17,7 +17,7 @@ int Lexer::check(it &first, it last) {
             type = OR;
             break;
         case '*':
-            type = REPEAT;
+            type = STAR;
             break;
         case '(':
             type = GROUP_START;
@@ -42,7 +42,7 @@ int Lexer::check(it &first, it last) {
                     //first = std::next(first, 2); // Skip the 'I' character and the character after it
                 } else if (*next == 'O') {
                     type = OUTPUT;
-                    ++first;
+                    //++first;
                 }
             } else {
                 std::cerr << "Invalid input: " << *first << std::endl;

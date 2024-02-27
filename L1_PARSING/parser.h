@@ -16,12 +16,12 @@ match_op* parse_match(it& first, it last);
 op* parse_group(it& first, it last);
 text_op* parse_text(it &first, it last);
 text_op* parse_any(it& first, it last);
-repeat_op* parse_repeat(it& first, it last);
+star_op* parse_star(it& first, it last);
 ignore_case_op* parse_ignore_case(it& first, it last);
-subexpr_op* parse_subexpr(it& first, it last);
-op* parse_operand(it& first, it last);
+op* parse_basic_opration(it& first, it last);
 void parse_post_group_operations(op *group, it& first, it last);
 count_op* parse_count(it& first, it last);
 int parse_number(it& first, it last);
+output_op* parse_output(it& first, it last);
 
 #endif //L1_PARSING_PARSER_H

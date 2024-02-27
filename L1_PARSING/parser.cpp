@@ -6,9 +6,6 @@
 #include <iostream>
 #include "Lexer.h"
 
-// Static variable to keep track of the output group number
-int output_group = 0;
-
 /*<CHAR>                  ->  any non-special character */
 char_op *parse_char(it &first, it last) {
     auto restore = first;
@@ -39,31 +36,73 @@ text_op *parse_text(it &first, it last) {
         return nullptr; // Base case to stop the recursion
     }
     auto char_node = parse_char(first, last);
-    if (!char_node)
+    if (!char_node) {
         return nullptr;
+    }
     auto *result = new text_op;
     result->add(char_node);
-    ++first;
-    Lexer lexer;
-    lexer.check(first, last);
-    if (first != last && lexer.type == Lexer::ANY) {
-        auto any_node = parse_any(first, last);
-        if (any_node) {
-            result->add(any_node);
+    if (first != last) {
+        ++first;
+        Lexer lexer;
+        int type = lexer.check(first, last);
+
+        if (type == Lexer::ANY) {
+            auto any_node = parse_any(first, last);
+            if (any_node) {
+                result->add(any_node);
+            }
+        } else {
+            result->add(parse_text(first, last));
         }
-    } else {
-        result->add(parse_text(first, last));
     }
-    result->count = char_node->count;
     return result;
 }
 
-/*<EXPR>      ->  <OR>  |  <REPEAT>  |  <GROUP>  |  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <TEXT> */
+/*<EXPR>      ->  <OR>  |  <STAR>  |  <GROUP>  |  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <TEXT> */
+/*expr_op *parse_expr(it &first, it last) {
+    if (first == last) {
+        return nullptr;
+    }
+    auto *exprNode = new expr_op;
+
+    while (first != last) {
+        if (output_op *outputNode = parse_output(first, last)) {
+            exprNode->add(outputNode);
+        } else if (ignore_case_op *ignore_caseNode = parse_ignore_case(first, last)) {
+            exprNode->add(ignore_caseNode);
+        } else if (count_op *countNode = parse_count(first, last)) {
+            exprNode->add(countNode);
+        } else if (op *groupNode = parse_group(first, last)) {
+            exprNode->add(groupNode);
+        } else if (or_op *orNode = parse_or(first, last)) {
+            exprNode->add(orNode);
+        } else if (text_op *anyNode = parse_any(first, last)) {
+            exprNode->add(anyNode);
+        } else if (text_op *textNode = parse_text(first, last)) {
+            exprNode->add(textNode);
+        } else if (star_op *repeatNode = parse_star(first, last)) {
+            exprNode->add(repeatNode);
+        } else {
+            break; // If none of the operations match, break the loop
+        }
+    }
+
+    return exprNode;
+}*/
+
+/**  <EXPR>                    ->  <OR>  |  <REPEAT>  |  <GROUP>  |  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <TEXT> */
 expr_op *parse_expr(it &first, it last) {
     if (first == last) {
         return nullptr;
     }
     auto restore = first;
+
+    output_op *outputNode = parse_output(first, last);
+    if (outputNode) {
+        auto *exprNode = new expr_op;
+        exprNode->add(outputNode);
+        return exprNode;
+    }
 
     ignore_case_op *ignore_caseNode = parse_ignore_case(first, last);
     if (ignore_caseNode) {
@@ -118,7 +157,7 @@ expr_op *parse_expr(it &first, it last) {
     first = restore;
 
 
-    repeat_op *repeatNode = parse_repeat(first, last);
+    star_op *repeatNode = parse_star(first, last);
     if (repeatNode) {
         auto expr_node = new expr_op;
         expr_node->add(repeatNode);
@@ -128,7 +167,7 @@ expr_op *parse_expr(it &first, it last) {
     return nullptr;
 }
 
-op* parse_operand(it &first, it last) {
+op* parse_basic_opration(it &first, it last) {
     auto restore = first;
     auto group_op = parse_group(first, last);
     if (group_op) {
@@ -142,14 +181,10 @@ op* parse_operand(it &first, it last) {
     if (text_node) {
         return text_node;
     }
-    /*first = restore;
-    ignore_case_op *ignore_caseNode = parse_ignore_case(first, last);
-    if (ignore_caseNode) {
-        return ignore_caseNode;
-    }*/
-    repeat_op *repeatNode = parse_repeat(first, last);
-    if (repeatNode) {
-        return repeatNode;
+
+    star_op *star_node = parse_star(first, last);
+    if (star_node) {
+        return star_node;
     }
     return nullptr;
 }
@@ -196,6 +231,7 @@ op* parse_group(it &first, it last) {
     return nullptr;
 }
 
+
 void parse_post_group_operations(op* group_node, it &first, it last) {
     // Check for ignore case operation after the group operation
     ignore_case_op *ignore_caseNode = parse_ignore_case(first, last);
@@ -211,10 +247,10 @@ void parse_post_group_operations(op* group_node, it &first, it last) {
 }
 
 
-
+/**  <OR>                    ->  <EXPR>  +  <EXPR> */
 or_op *parse_or(it first, it last) {
     auto first_check = first;
-    op *lhs = parse_operand(first_check, last);
+    op *lhs = parse_basic_opration(first_check, last);
     if (!lhs) {
         std::cout << "lhs is nullptr\n";
         return nullptr;
@@ -226,7 +262,7 @@ or_op *parse_or(it first, it last) {
     }
 
     first_check++; // Skip the '+' operator
-    op *rhs = parse_operand(first_check, last);
+    op *rhs = parse_basic_opration(first_check, last);
 
     if (!rhs) {
         std::cout << "rhs is nullptr\n";
@@ -243,6 +279,7 @@ or_op *parse_or(it first, it last) {
     return result;
 }
 
+/**  <ANY>                    ->  .  [<ANY>] */
 text_op *parse_any(it &first, it last) {
     Lexer lexer;
     lexer.check(first, last);
@@ -256,7 +293,7 @@ text_op *parse_any(it &first, it last) {
                 any_node->count = count_node->count;
             }
         }
-        // Wrap the any_op inside a text_op before returning
+        // Wrap the any_op inside a text_op before returning (only needed for easier printing)
         auto *text_node = new text_op;
         text_node->add(any_node);
         lexer.check(first, last);
@@ -268,19 +305,21 @@ text_op *parse_any(it &first, it last) {
     return nullptr;
 }
 
-repeat_op *parse_repeat(it &first, it last) {
+/**  <STAR>               ->  <TEXT>  * */
+star_op *parse_star(it &first, it last) {
     Lexer lexer;
     lexer.check(first, last);
-    if (lexer.type == Lexer::REPEAT) {
+    if (lexer.type == Lexer::STAR) {
         ++first; // Move the iterator forward
-        return new repeat_op;
+        return new star_op;
     }
     return nullptr;
 }
 
+/**  <IGNORE_CASE>    ->  <TEXT> \I  |  <GROUP> \I **/
 ignore_case_op *parse_ignore_case(it &first, it last) {
     auto first_check = first;
-    op *lhs = parse_operand(first_check, last); // Changed from parse_text to parse_operand
+    op *lhs = parse_basic_opration(first_check, last); // Changed from parse_text to parse_operand
     if (!lhs) {
         std::cout << "lhs is nullptr\n";
         return nullptr;
@@ -291,8 +330,8 @@ ignore_case_op *parse_ignore_case(it &first, it last) {
         return nullptr;
     }
 
-    first_check++; // Skip the 'I' operator
-    first_check++;
+    first_check++; // Skip the '//I' operator
+    first_check++; // Skip the 'I' character
 
     first = first_check;
     auto *result = new ignore_case_op;
@@ -312,6 +351,7 @@ int parse_number(it &first, it last) {
     return number;
 }
 
+/** <COUNT>               ->  <CHAR>  {  <NUMBER>  } |  <ANY>  {  <NUMBER>  } **/
 count_op *parse_count(it &first, it last) {
     Lexer lexer;
     if (lexer.check(first, last) == Lexer::COUNT_START) {
@@ -327,5 +367,21 @@ count_op *parse_count(it &first, it last) {
     }
     return nullptr;
 }
+
+output_op *parse_output(it &first, it last) {
+    Lexer lexer;
+    if (lexer.check(first, last) == Lexer::OUTPUT) {
+        ++first; // Skip the '\\'
+        ++first; // Skip the 'O'
+        if (lexer.check(first, last) == Lexer::COUNT_START) {
+            auto count_node = parse_count(first, last);
+            if (count_node) {
+                return new output_op(count_node->count);
+            }
+        }
+    }
+    return nullptr;
+}
+
 
 

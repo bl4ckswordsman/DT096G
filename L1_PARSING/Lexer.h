@@ -11,17 +11,17 @@
 
 //GRAMMAR:
 /**
- *  <MATCH>                ->  <EXPR>
- *  <EXPR>                    ->  <OR>  |  <REPEAT>  |  <GROUP>  |  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <TEXT>
+    <MATCH>                ->  <EXPR>
+    <EXPR>                    ->  <OR>  |  <STAR>  |  <GROUP>  |  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <TEXT>
      <OR>                       ->  <TEXT>  +  <TEXT>
-     <REPEAT>               ->  <TEXT>  *
+     <STAR>                   ->  <TEXT>  *
      <GROUP>                ->  (  <EXPR>  )
-     <ANY>                     ->  .
+     <ANY>                    ->  .  [<ANY>]
      <COUNT>               ->  <CHAR>  {  <NUMBER>  } |  <ANY>  {  <NUMBER>  }
-     <IGNORE_CASE>    ->  <TEXT>  \I
-     <OUTPUT>             ->  <EXPR>  \O{  <NUMBER>  }
-     <TEXT>                 ->  <CHAR> [<TEXT>]
-     <NUMBER>             ->  <DIGIT>  |  <DIGIT>  <NUMBER>
+     <IGNORE_CASE>     ->  <TEXT>  \I
+     <OUTPUT>              ->  <EXPR>  \O{  <NUMBER>  }
+     <TEXT>                   ->  <CHAR> [<TEXT>]
+     <NUMBER>             ->  <DIGIT>  [<NUMBER>]
      <CHAR>                  ->  any non-special character */
 
 using it = std::string::iterator;
@@ -30,7 +30,7 @@ class Lexer {
 public:
     enum {
         OR, // +
-        REPEAT, // *
+        STAR, // *
         GROUP_START, // (
         GROUP_END, // )
         ANY, // .

@@ -7,6 +7,11 @@
 
 #include "Lexer.h"
 
+// Static variable to keep track of the output group number
+int output_group = 0;
+
+// Static container to keep track of the captured groups
+std::vector<std::string> captured_groups;
 
 bool op::eval(it first, it last) {
     for (auto op: children) {
@@ -62,15 +67,25 @@ bool text_op::eval(it first, it last) {
     return true;
 }*/
 
-
 bool expr_op::eval(it first, it last) {
+    bool anyChildEvaluated = false;
+    for (auto op: children) {
+        if (op->eval(first, last)) {
+            anyChildEvaluated = true;
+        }
+    }
+    return anyChildEvaluated;
+}
+
+
+/*bool expr_op::eval(it first, it last) {
     for (auto op: children) {
         if (op->eval(first, last)) {
             return true;
         }
     }
     return false;
-}
+}*/
 
 bool match_op::eval(it first, it last){
     if(first == last) {
@@ -84,12 +99,28 @@ bool match_op::eval(it first, it last){
 }
 
 bool group_op::eval(it first, it last) {
+    auto start = first;
     for (auto op: children) {
+        op->capture(first, last);
         if (!op->eval(first, last)) {
             return false;
         }
     }
+    if (start != first) {
+        captured_groups.push_back(std::string(start, first));
+    }
     return true;
+}
+
+void group_op::capture(it &first, it &last) {
+    auto start = first;
+    for (auto op: children) {
+        op->eval(first, last);
+        op->capture(first, last); // Call capture on the child nodes
+    }
+    if (start != first) {
+        captured_groups.push_back(std::string(start, first));
+    }
 }
 
 bool or_op::eval(it first, const it last) {
@@ -141,7 +172,7 @@ bool any_op::eval(it first, it last) {
     return true; // If we have 'count' characters, we consider it a match
 }
 
-bool repeat_op::eval(it first, it last) {
+bool star_op::eval(it first, it last) {
     if (first == last) {
         return false;
     }
@@ -170,11 +201,6 @@ void ignore_case_op::ignore_case_for_all(op *node) {
     }
 }
 
-bool subexpr_op::eval(it first, it last) {
-    if (children.empty()) return false;
-    return children[0]->eval(first, last);
-}
-
 bool count_op::eval(it first, it last) {
     if (children.empty()) {
         return false; // or handle the error in some other way
@@ -185,4 +211,12 @@ bool count_op::eval(it first, it last) {
         }
     }
     return true;
+}
+
+bool output_op::eval(it first, it last) {
+    if (group_index < captured_groups.size()) {
+        std::cout << "  ---Captured group: "<< captured_groups[group_index] << std::endl;
+        return true;
+    }
+    return false;
 }
