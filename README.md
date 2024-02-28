@@ -95,7 +95,18 @@ while (iterator.hasNext()) {
 
 <a id="item-three"></a>
 ## [Lab 3](/L3_CPP): Investigation of the C++ templating mechanism and implementation of an algorithm solved at compile time
+### Task
+Implement a template class/struct for a compile-time power function. The exponent is an integer template argument, and the base is a function argument.
 
+```cpp
+template<int Exponent>
+struct power<Exponent, std::enable_if_t<(Exponent >= 0)>> {
+    template<typename BaseType>
+    static constexpr BaseType calculatePower(BaseType base) {
+        return Exponent == 0 ? 1 : base * power<Exponent - 1>::calculatePower(base);
+    }
+};
+```
 
 <br>
 
