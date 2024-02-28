@@ -51,6 +51,11 @@ text_op *parse_text(it &first, it last) {
             if (any_node) {
                 result->add(any_node);
             }
+        } else if (type == Lexer::STAR) {
+            auto star_node = parse_star(first, last);
+            if (star_node) {
+                result->add(star_node);
+            }
         } else {
             result->add(parse_text(first, last));
         }
@@ -90,7 +95,8 @@ text_op *parse_text(it &first, it last) {
     return exprNode;
 }*/
 
-/**  <EXPR>                    ->  <OR>  |  <REPEAT>  |  <GROUP>  |  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <TEXT> */
+/**  <EXPR>                    ->  <OR>  |  <REPEAT>  |  <GROUP>  |
+ *  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <TEXT>     */
 expr_op *parse_expr(it &first, it last) {
     if (first == last) {
         return nullptr;
@@ -279,7 +285,7 @@ or_op *parse_or(it first, it last) {
     return result;
 }
 
-/**  <ANY>                    ->  .  [<ANY>] */
+/**  <ANY>                    ->  .              */
 text_op *parse_any(it &first, it last) {
     Lexer lexer;
     lexer.check(first, last);

@@ -89,7 +89,7 @@ void print_colored(const std::string &input, const std::string &pattern) {
 
 
 int main(int argc, char *argv[]) {
-    std::string program = "*"; // argv[1];
+    std::string program = "(Love+hate)\\I"; // argv[1];
     std::string input =
             "Waterloo I was defeated, you won the war Waterloo promise to love you for ever more Waterloo couldn't escape if I wanted to Waterloo knowing my fate is to be with you Waterloo finally facing my Waterloo";
     auto first = program.begin();

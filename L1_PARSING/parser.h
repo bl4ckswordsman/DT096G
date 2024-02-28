@@ -8,7 +8,6 @@
 
 using it = std::string::iterator;
 
-
 or_op* parse_or(it first, it last);
 char_op* parse_char(it& first, it last);
 expr_op* parse_expr(it& first, it last);

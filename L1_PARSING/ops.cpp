@@ -68,13 +68,13 @@ bool text_op::eval(it first, it last) {
 }*/
 
 bool expr_op::eval(it first, it last) {
-    bool anyChildEvaluated = false;
+    bool any_child_evaluated = false;
     for (auto op: children) {
         if (op->eval(first, last)) {
-            anyChildEvaluated = true;
+            any_child_evaluated = true;
         }
     }
-    return anyChildEvaluated;
+    return any_child_evaluated;
 }
 
 

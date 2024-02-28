@@ -10,23 +10,26 @@
 
 Grammar for the parser:
 ```
- <MATCH>           ->  <EXPR>
- <EXPR>            ->  <OR>  |  <REPEAT>  |  <GROUP>  |  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <TEXT>    <OR>              ->  <TEXT>  +  <TEXT>
- <REPEAT>          ->  <TEXT>  *
- <GROUP>           ->  (  <EXPR>  )
- <ANY>             ->  .
- <COUNT>           ->  <CHAR>  {  <NUMBER>  } |  <ANY>  {  <NUMBER>  }
- <IGNORE_CASE>     ->  <TEXT>  \I
- <OUTPUT>          ->  <EXPR>  \O{  <NUMBER>  }
- <TEXT>            ->  <CHAR> [<TEXT>]
- <NUMBER>          ->  <DIGIT>  |  <DIGIT>  <NUMBER>
- <CHAR>            ->  any non-special character 
+  <MATCH>               ->  <EXPR>
+  <EXPR>                   ->  <OR>  |  <STAR>  |  <GROUP>  |  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <TEXT>
+  <OR>                       ->  <TEXT>  +  <TEXT>
+  <STAR>                   ->  <TEXT>  *
+  <GROUP>                ->  (  <EXPR>  )
+  <ANY>                    ->  .
+  <COUNT>                ->  <CHAR>  {  <NUMBER>  } |  <ANY>  {  <NUMBER>  }
+  <IGNORE_CASE>     ->  <TEXT>  \I
+  <OUTPUT>              ->  <EXPR>  \O{  <NUMBER>  }
+  <TEXT>                   ->  <CHAR> [<TEXT>]
+  <NUMBER>             ->  <DIGIT>  [<NUMBER>]
+  <CHAR>                  ->  any non-special character                  
 ```
 
+> [!NOTE]
+> `<OUTPUT>` is not fully implemented.
 
 <details>
   <summary>Class diagram (Click to expand)</summary>
- 
+
 ```mermaid
 classDiagram
 op --> char_op
@@ -35,22 +38,30 @@ op --> expr_op
 op --> match_op
 op --> group_op
 op --> or_op
+op --> star_op
+op --> ignore_case_op
+op --> count_op
+op --> output_op
 char_op --> any_op
-char_op --> ignore_case_op
 op : bool eval(it first, it last)
 op : void add(op child)
 op : vector<op *> children
 char_op : bool eval(it first, it last) override
 char_op : character char
 text_op : bool eval(it first, it last) override
-text_op : string text
 expr_op : bool eval(it first, it last) override
 match_op : bool eval(it first, it last) override
 group_op : bool eval(it first, it last) override
+group_op : void capture(it &first, it &last) override
 or_op : bool eval(it first, it last) override
 or_op : int last_evaluated_child
 any_op : bool eval(it first, it last) override
+star_op : bool eval(it first, it last) override
 ignore_case_op : bool eval(it first, it last) override
+ignore_case_op : void ignore_case_for_all(op *node)
+count_op : bool eval(it first, it last) override
+output_op : bool eval(it first, it last) override
+output_op : int group_index
 ```
 </details>
 

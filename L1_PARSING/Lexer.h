@@ -16,13 +16,13 @@
      <OR>                       ->  <TEXT>  +  <TEXT>
      <STAR>                   ->  <TEXT>  *
      <GROUP>                ->  (  <EXPR>  )
-     <ANY>                    ->  .  [<ANY>]
+     <ANY>                    ->  .
      <COUNT>               ->  <CHAR>  {  <NUMBER>  } |  <ANY>  {  <NUMBER>  }
      <IGNORE_CASE>     ->  <TEXT>  \I
      <OUTPUT>              ->  <EXPR>  \O{  <NUMBER>  }
      <TEXT>                   ->  <CHAR> [<TEXT>]
      <NUMBER>             ->  <DIGIT>  [<NUMBER>]
-     <CHAR>                  ->  any non-special character */
+     <CHAR>                  ->  any non-special character                  */
 
 using it = std::string::iterator;
 
