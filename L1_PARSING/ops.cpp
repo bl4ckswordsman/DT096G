@@ -32,17 +32,10 @@ void op::set_ignore_case(bool ignore_case) {
     this->ignore_case = ignore_case;
 }
 
-/*bool char_op::eval(it first, it last) {
-    if(first != last && ((ignore_case && tolower(*first) == tolower(character)) || *first == character)) {
-        ++first;
-        return true;
-    }
-    return false;
-}*/
-
 bool char_op::eval(it first, it last) {
     for (int i = 0; i < count; ++i) {
-        if (first == last || (!ignore_case && *first != character) || (ignore_case && tolower(*first) != tolower(character))) {
+        if (first == last || (!ignore_case && *first != character) || (
+                ignore_case && tolower(*first) != tolower(character))) {
             return false;
         }
         ++first;
@@ -58,15 +51,6 @@ bool text_op::eval(it first, it last) {
     return result;
 }
 
-/*bool text_op::eval(it first, it last) {
-    for (int i = 0; i < count; ++i) {
-        if (!children[0]->eval(first, last)) {
-            return false;
-        }
-    }
-    return true;
-}*/
-
 bool expr_op::eval(it first, it last) {
     bool any_child_evaluated = false;
     for (auto op: children) {
@@ -77,22 +61,12 @@ bool expr_op::eval(it first, it last) {
     return any_child_evaluated;
 }
 
-
-/*bool expr_op::eval(it first, it last) {
-    for (auto op: children) {
-        if (op->eval(first, last)) {
-            return true;
-        }
-    }
-    return false;
-}*/
-
-bool match_op::eval(it first, it last){
-    if(first == last) {
+bool match_op::eval(it first, it last) {
+    if (first == last) {
         return false;
     }
     auto result = children[0]->eval(first, last);
-    if(!result){
+    if (!result) {
         return eval(first + 1, last);
     }
     return true;
@@ -128,41 +102,17 @@ bool or_op::eval(it first, const it last) {
     bool lhs = children[0]->eval(first, last);
     if (lhs) {
         last_evaluated_child = 0;
-        first = first_copy; // Reset the iterator to the origin// If the first child operation was not successful, evaluate the second child operational position
+        first = first_copy;
+        // Reset the iterator to the origin// If the first child operation was not successful, evaluate the second child operational position
         return true;
     }
-    const bool rhs = children[1]->eval(first, last); // If the first child operation was not successful, evaluate the second child operation
+    const bool rhs = children[1]->eval(first, last);
+    // If the first child operation was not successful, evaluate the second child operation
     if (rhs) {
         last_evaluated_child = 1;
     }
     return rhs;
 }
-
-
-/*bool any_op::eval(it first, it last) {
-    if (first == last) {
-        return false;
-    }
-    //++first;
-    if (first != last) {
-        return true;
-    }
-    return false;
-}*/
-
-/*bool any_op::eval(it first, it last) {
-    if (std::distance(first, last) < count) {
-        return false; // Not enough characters left in the input string
-    }
-    char expected_char = *first;
-    for (int i = 0; i < count; ++i) {
-        if (*first != expected_char) {
-            return false; // Found a character that doesn't match the expected character
-        }
-        ++first;
-    }
-    return true; // All characters matched the expected character
-}*/
 
 bool any_op::eval(it first, it last) {
     if (std::distance(first, last) < count) {
@@ -215,7 +165,7 @@ bool count_op::eval(it first, it last) {
 
 bool output_op::eval(it first, it last) {
     if (group_index < captured_groups.size()) {
-        std::cout << "  ---Captured group: "<< captured_groups[group_index] << std::endl;
+        /*std::cout << "  ---Captured group: "<< captured_groups[group_index] << std::endl;  //TODO: Debug print*/
         return true;
     }
     return false;

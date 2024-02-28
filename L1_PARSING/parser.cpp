@@ -32,7 +32,7 @@ char_op *parse_char(it &first, it last) {
 
 /*<TEXT>    ->  <CHAR> [<TEXT>] */
 text_op *parse_text(it &first, it last) {
-    if (first == last ) {
+    if (first == last) {
         return nullptr; // Base case to stop the recursion
     }
     auto char_node = parse_char(first, last);
@@ -128,7 +128,7 @@ expr_op *parse_expr(it &first, it last) {
     if (group_op) {
         auto expr_node = new expr_op;
         expr_node->add(group_op);
-        if(first != last) {
+        if (first != last) {
             ++first;
         } // Move the iterator forward
         // Continue parsing the remaining operations
@@ -173,7 +173,7 @@ expr_op *parse_expr(it &first, it last) {
     return nullptr;
 }
 
-op* parse_basic_opration(it &first, it last) {
+op *parse_basic_opration(it &first, it last) {
     auto restore = first;
     auto group_op = parse_group(first, last);
     if (group_op) {
@@ -206,7 +206,7 @@ match_op *parse_match(it &first, it last) {
 }
 
 /*     <GROUP>                ->  (  <EXPR>  ) */
-op* parse_group(it &first, it last) {
+op *parse_group(it &first, it last) {
     Lexer lexer;
     lexer.check(first, last);
     if (lexer.type == Lexer::GROUP_START) {
@@ -238,7 +238,7 @@ op* parse_group(it &first, it last) {
 }
 
 
-void parse_post_group_operations(op* group_node, it &first, it last) {
+void parse_post_group_operations(op *group_node, it &first, it last) {
     // Check for ignore case operation after the group operation
     ignore_case_op *ignore_caseNode = parse_ignore_case(first, last);
     if (ignore_caseNode) {
@@ -258,12 +258,12 @@ or_op *parse_or(it first, it last) {
     auto first_check = first;
     op *lhs = parse_basic_opration(first_check, last);
     if (!lhs) {
-        std::cout << "lhs is nullptr\n";
+        /*std::cout << "lhs is nullptr\n"; //TODO: Debug print*/
         return nullptr;
     }
     auto token = Lexer::get_next_token(first_check, last);
     if (token != Lexer::OR) {
-        std::cout << "Next token is not OR\n";
+        /*std::cout << "Next token is not OR\n";//TODO: Debug print*/
         return nullptr;
     }
 
@@ -271,7 +271,7 @@ or_op *parse_or(it first, it last) {
     op *rhs = parse_basic_opration(first_check, last);
 
     if (!rhs) {
-        std::cout << "rhs is nullptr\n";
+        /*std::cout << "rhs is nullptr\n";  //TODO: Debug print*/
         return nullptr;
     }
 
@@ -279,9 +279,9 @@ or_op *parse_or(it first, it last) {
     auto *result = new or_op;
     result->add(lhs);
     result->add(rhs);
-    std::cout << "Parsed or operation: " << '\n';
+    /*std::cout << "Parsed or operation: " << '\n';  //TODO: Debug print
     std::cout << "lhs: " << lhs << '\n';
-    std::cout << "rhs: " << rhs << '\n';
+    std::cout << "rhs: " << rhs << '\n';*/
     return result;
 }
 
@@ -327,12 +327,12 @@ ignore_case_op *parse_ignore_case(it &first, it last) {
     auto first_check = first;
     op *lhs = parse_basic_opration(first_check, last); // Changed from parse_text to parse_operand
     if (!lhs) {
-        std::cout << "lhs is nullptr\n";
+        /*std::cout << "lhs is nullptr\n";  //TODO: Debug print*/
         return nullptr;
     }
     auto token = Lexer::get_next_token(first_check, last);
     if (token != Lexer::IGNORE_CASE) {
-        std::cout << "Next token is not IGNORE_CASE\n";
+        /*std::cout << "Next token is not IGNORE_CASE\n";  //TODO: Debug print*/
         return nullptr;
     }
 
@@ -343,8 +343,8 @@ ignore_case_op *parse_ignore_case(it &first, it last) {
     auto *result = new ignore_case_op;
     result->add(lhs);
 
-    std::cout << "Parsed ignore_case operation: " << '\n'; // TODO: Remove debug print
-    std::cout << "lhs: " << lhs << '\n';
+    /*std::cout << "Parsed ignore_case operation: " << '\n'; // TODO: Remove debug print
+    std::cout << "lhs: " << lhs << '\n';*/
     return result;
 }
 
@@ -362,8 +362,8 @@ count_op *parse_count(it &first, it last) {
     Lexer lexer;
     if (lexer.check(first, last) == Lexer::COUNT_START) {
         ++first; // Move the iterator forward
-        int count = parse_number(first, last);        // Parse the number enclosed in '{}'
-        std::cout << "Parsed count: " << count << '\n'; //TODO: Remove debug print
+        int count = parse_number(first, last); // Parse the number enclosed in '{}'
+        /*std::cout << "Parsed count: " << count << '\n'; //TODO: Remove debug print*/
         if (lexer.check(first, last) != Lexer::COUNT_END) {
             std::cerr << "Expected '}' not found " << std::endl;
             return nullptr;
@@ -388,6 +388,3 @@ output_op *parse_output(it &first, it last) {
     }
     return nullptr;
 }
-
-
-
