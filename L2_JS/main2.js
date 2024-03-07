@@ -1,3 +1,7 @@
+/**
+ * Implementation of an iterator pattern using the prototype mechanism.
+ */
+
 Array.prototype.iterator = function() {
     let index = 0; // Initialize index
     const array = this; // Initialize array
