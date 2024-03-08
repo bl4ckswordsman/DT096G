@@ -10,11 +10,11 @@ class ArrayIterator {
 
     hasNext() {
         return this.index < this.array.length; // Check if more elements exist
-    }// "this" refers to the context of func call. determined by where func is invoked, not where it's defined
+    }// "this" refers to the instance of the class
 
     next() {
         if (this.hasNext()) { // dot is used for properties
-            return this.array[this.index++]; // Return next element if exists
+            return this.array[this.index++]; // "this" refers to the instance of the class
         }
         // console.log("No more elements"); // Log message if no more elements
         return null;
@@ -23,7 +23,7 @@ class ArrayIterator {
 
 // Add iterator method to Array prototype
 Array.prototype.iterator = function() {
-    return new ArrayIterator(this);
+    return new ArrayIterator(this);     // the array is passed to the constructor
 }
 
 const arrayList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // Define array
