@@ -10,18 +10,18 @@
 
 Grammar for the parser:
 ```
-  <MATCH>               ->  <EXPR>
-  <EXPR>                   ->  <OR>  |  <STAR>  |  <GROUP>  |  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <TEXT>
-  <OR>                       ->  <TEXT>  +  <TEXT>
-  <STAR>                   ->  <TEXT>  *
-  <GROUP>                ->  (  <EXPR>  )
-  <ANY>                    ->  .
-  <COUNT>                ->  <CHAR>  {  <NUMBER>  } |  <ANY>  {  <NUMBER>  }
+  <MATCH>           ->  <EXPR>
+  <EXPR>            ->  <OR>  |  <STAR>  |  <GROUP>  |  <ANY>  |  <COUNT>  |  <IGNORE_CASE>  |  <OUTPUT>  |  <TEXT>
+  <OR>              ->  <TEXT>  +  <TEXT>
+  <STAR>            ->  <TEXT>  *
+  <GROUP>           ->  (  <EXPR>  )
+  <ANY>             ->  .
+  <COUNT>           ->  <CHAR>  {  <NUMBER>  } |  <ANY>  {  <NUMBER>  }
   <IGNORE_CASE>     ->  <TEXT>  \I
-  <OUTPUT>              ->  <EXPR>  \O{  <NUMBER>  }
-  <TEXT>                   ->  <CHAR> [<TEXT>]
-  <NUMBER>             ->  <DIGIT>  [<NUMBER>]
-  <CHAR>                  ->  any non-special character                  
+  <OUTPUT>          ->  <EXPR>  \O{  <NUMBER>  }
+  <TEXT>            ->  <CHAR> [<TEXT>]
+  <NUMBER>          ->  <DIGIT>  [<NUMBER>]
+  <CHAR>            ->  any non-special character                  
 ```
 
 > [!NOTE]
